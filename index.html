@@ -898,8 +898,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-size: cover;
-            background-position: center;
+            background-color: rgba(10, 10, 10, 0.6);
             border-radius: 15px;
             padding: 30px 20px;
             transition: all 0.3s ease;
@@ -911,13 +910,13 @@
             animation-delay: calc(var(--i) * 0.5s);
         }
 
-        .skill-item:nth-child(1) { --i: 1; background-image: url('https://portofolio-ryuuxrpl2.vercel.app/gambar/frontend/html.png'); }
-        .skill-item:nth-child(2) { --i: 2; background-image: url('https://portofolio-ryuuxrpl2.vercel.app/gambar/frontend/css.png'); }
-        .skill-item:nth-child(3) { --i: 3; background-image: url('https://portofolio-ryuuxrpl2.vercel.app/gambar/frontend/javascript.png'); }
-        .skill-item:nth-child(4) { --i: 4; background-image: url('https://portofolio-ryuuxrpl2.vercel.app/gambar/apps/ALIGHT%20MOTION.jpg'); }
-        .skill-item:nth-child(5) { --i: 5; background-image: url('https://portofolio-ryuuxrpl2.vercel.app/gambar/apps/github.png'); }
-        .skill-item:nth-child(6) { --i: 6; background-image: url('https://portofolio-ryuuxrpl2.vercel.app/gambar/apps/vscode.png'); }
-        .skill-item:nth-child(7) { --i: 7; background-image: url('https://portofolio-ryuuxrpl2.vercel.app/gambar/apps/chatgpt.png'); }
+        .skill-item:nth-child(1) { --i: 1; }
+        .skill-item:nth-child(2) { --i: 2; }
+        .skill-item:nth-child(3) { --i: 3; }
+        .skill-item:nth-child(4) { --i: 4; }
+        .skill-item:nth-child(5) { --i: 5; }
+        .skill-item:nth-child(6) { --i: 6; }
+        .skill-item:nth-child(7) { --i: 7; }
 
         .skill-item::before {
             content: '';
@@ -985,7 +984,6 @@
             object-fit: contain;
             margin-bottom: 15px;
             transition: all 0.3s ease;
-            filter: brightness(0) invert(1);
             position: relative;
             z-index: 3;
         }
@@ -1925,24 +1923,38 @@
             
             <div class="skills-container">
                 <div class="skill-item" data-aos="zoom-in" data-aos-delay="100" data-skill="html">
+                    <img src="https://portofolio-ryuuxrpl2.vercel.app/gambar/frontend/html.png" alt="HTML" class="skill-logo">
+                    <div class="skill-name">HTML</div>
                 </div>
                 
                 <div class="skill-item" data-aos="zoom-in" data-aos-delay="200" data-skill="css">
+                    <img src="https://portofolio-ryuuxrpl2.vercel.app/gambar/frontend/css.png" alt="CSS" class="skill-logo">
+                    <div class="skill-name">CSS</div>
                 </div>
                 
                 <div class="skill-item" data-aos="zoom-in" data-aos-delay="300" data-skill="javascript">
+                    <img src="https://portofolio-ryuuxrpl2.vercel.app/gambar/frontend/javascript.png" alt="JavaScript" class="skill-logo">
+                    <div class="skill-name">JavaScript</div>
                 </div>
                 
                 <div class="skill-item" data-aos="zoom-in" data-aos-delay="400" data-skill="alight">
+                    <img src="https://portofolio-ryuuxrpl2.vercel.app/gambar/apps/ALIGHT%20MOTION.jpg" alt="Alight Motion" class="skill-logo">
+                    <div class="skill-name">Alight Motion</div>
                 </div>
                 
                 <div class="skill-item" data-aos="zoom-in" data-aos-delay="500" data-skill="github">
+                    <img src="https://portofolio-ryuuxrpl2.vercel.app/gambar/apps/github.png" alt="GitHub" class="skill-logo">
+                    <div class="skill-name">GitHub</div>
                 </div>
                 
                 <div class="skill-item" data-aos="zoom-in" data-aos-delay="600" data-skill="vscode">
+                    <img src="https://portofolio-ryuuxrpl2.vercel.app/gambar/apps/vscode.png" alt="VS Code" class="skill-logo">
+                    <div class="skill-name">VS Code</div>
                 </div>
                 
                 <div class="skill-item" data-aos="zoom-in" data-aos-delay="700" data-skill="chatgpt">
+                    <img src="https://portofolio-ryuuxrpl2.vercel.app/gambar/apps/chatgpt.png" alt="ChatGPT" class="skill-logo">
+                    <div class="skill-name">ChatGPT</div>
                 </div>
             </div>
         </div>
@@ -2122,7 +2134,7 @@
                     <div class="form-group">
                         <label for="subject">Subjek</label>
                         <input type="text" id="subject" required placeholder="Subjek pesan">
-                    </div>
+                        </div>
                     <div class="form-group">
                         <label for="message">Pesan</label>
                         <textarea id="message" required placeholder="Tulis pesan Anda di sini"></textarea>
@@ -2830,5 +2842,4 @@
         });
     </script>
 </body>
-
 </html>
