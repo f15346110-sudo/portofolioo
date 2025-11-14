@@ -2841,5 +2841,30 @@
             }
         });
     </script>
+    
+    <script type="module">
+        // Import the functions you need from the Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQgyNklQVIjkHXNNy6UWnB_mye2_ljQJw",
+            authDomain: "portofolio-wan2121.firebaseapp.com",
+            projectId: "portofolio-wan2121",
+            storageBucket: "portofolio-wan2121.firebasestorage.app",
+            messagingSenderId: "795394025066",
+            appId: "1:795394025066:web:90cbea07cd94ef4d1b0c13",
+            measurementId: "G-RW2BPR99Y2"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        
+        // Initialize Analytics and get a reference to the service
+        const analytics = getAnalytics(app);
+        
+        console.log("Firebase initialized successfully");
+    </script>
 </body>
 </html>
