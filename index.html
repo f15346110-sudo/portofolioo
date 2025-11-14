@@ -15,10 +15,10 @@
         }
 
         :root {
-            --primary: #0a0a0a; /* Warna dasar hitam */
-            --secondary: #ffffff; /* Warna aksen putih */
-            --accent: #e0e0e0; /* Warna aksen abu-abu terang */
-            --text-color: #ffffff; /* Warna teks putih */
+            --primary: #0a0a0a;
+            --secondary: #ffffff;
+            --accent: #e0e0e0;
+            --text-color: #ffffff;
             --card-bg: rgba(10, 10, 10, 0.8);
             --border-color: rgba(255, 255, 255, 0.2);
             --glow: rgba(255, 255, 255, 0.3);
@@ -35,7 +35,7 @@
             font-weight: 400;
         }
 
-        /* City Background - HD Quality with Smooth Motion */
+        /* City Background */
         .city-bg {
             position: fixed;
             top: 0;
@@ -51,18 +51,12 @@
         }
 
         @keyframes moveCity {
-            0% {
-                transform: translateX(0);
-            }
-            50% {
-                transform: translateX(-50%);
-            }
-            100% {
-                transform: translateX(0);
-            }
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
         }
 
-        /* Overlay for text readability */
+        /* Overlay */
         .bg-overlay {
             position: fixed;
             top: 0;
@@ -225,7 +219,13 @@
             box-shadow: 0 10px 20px var(--neon-glow);
         }
 
-        /* Music Player - Enhanced */
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Music Player */
         .music-player {
             position: fixed;
             bottom: 30px;
@@ -542,15 +542,9 @@
 
         /* Floating Animation */
         @keyframes float {
-            0% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-15px);
-            }
-            100% {
-                transform: translateY(0px);
-            }
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
         }
 
         /* Rotating Ring Animation */
@@ -568,12 +562,8 @@
         }
 
         @keyframes rotateRing {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* Pulse Glow Effect */
@@ -590,29 +580,14 @@
         }
 
         @keyframes pulseGlow {
-            0% {
-                transform: scale(1);
-                opacity: 0.5;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 0.8;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 0.5;
-            }
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 0.5; }
         }
 
         @keyframes profileImage {
-            0% {
-                transform: scale(0.8) rotate(-10deg);
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1) rotate(0deg);
-                opacity: 1;
-            }
+            0% { transform: scale(0.8) rotate(-10deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
         }
 
         .profile-wrapper:hover .profile-img {
@@ -647,12 +622,8 @@
         }
 
         @keyframes blink {
-            0%, 50% {
-                border-color: var(--secondary);
-            }
-            51%, 100% {
-                border-color: transparent;
-            }
+            0%, 50% { border-color: var(--secondary); }
+            51%, 100% { border-color: transparent; }
         }
 
         .profile-info .age {
@@ -669,14 +640,8 @@
         }
 
         @keyframes fadeInUp {
-            0% {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
 
         /* Hero Buttons */
@@ -876,7 +841,7 @@
             animation: fadeInUp 1s ease-out;
         }
 
-        /* Skills Section - Interactive Layout */
+        /* Skills Section */
         .skills {
             background: rgba(10, 10, 10, 0.8);
             position: relative;
@@ -1321,6 +1286,18 @@
             border-radius: 10px;
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .visitor-item:hover {
@@ -1783,7 +1760,7 @@
     </style>
 </head>
 <body>
-    <!-- City Background - HD Quality with Smooth Motion -->
+    <!-- City Background -->
     <div class="city-bg"></div>
     <div class="bg-overlay"></div>
 
@@ -1810,7 +1787,7 @@
         </div>
     </div>
 
-    <!-- Music Player - Hidden by default -->
+    <!-- Music Player -->
     <div class="music-player" id="musicPlayer">
         <div class="music-header">
             <div class="music-title">Playlist</div>
@@ -1954,7 +1931,7 @@
         </div>
     </section>
 
-    <!-- Skills Section - Interactive Layout -->
+    <!-- Skills Section -->
     <section id="skills" class="skills" data-aos="fade-up">
         <div class="container">
             <div class="section-title">
@@ -2098,15 +2075,6 @@
             </div>
             <div class="visitor-list" id="visitorList">
                 <!-- Visitor items will be added dynamically -->
-                <div class="visitor-item">
-                    <div class="visitor-icon">
-                        <i class="fas fa-spinner fa-spin"></i>
-                    </div>
-                    <div class="visitor-info">
-                        <div class="visitor-name">Memuat data pengunjung...</div>
-                        <div class="visitor-time">Mohon tunggu sebentar</div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -2135,15 +2103,6 @@
             </div>
             <div class="message-list" id="messageList">
                 <!-- Message items will be added dynamically -->
-                <div class="message-item">
-                    <div class="message-header">
-                        <div class="message-name">Memuat pesan...</div>
-                        <div class="message-time">Mohon tunggu sebentar</div>
-                    </div>
-                    <div class="message-content">
-                        <i class="fas fa-spinner fa-spin"></i> Sedang memuat data dari server
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -2230,7 +2189,7 @@
             offset: 100
         });
 
-        // Sound effect for clicks - using external file
+        // Sound effect for clicks
         const clickSound = new Audio('uiclick.mp3');
         clickSound.volume = 0.3;
 
@@ -2345,7 +2304,10 @@
                     // Hide the modal
                     visitorModal.classList.add('hidden');
                     
-                    // Load visitor history
+                    // Add visitor to DOM immediately
+                    addVisitorToDOM(visitorData);
+                    
+                    // Load visitor history to refresh the list
                     loadVisitorHistory();
                     
                     // Show success notification
@@ -2357,6 +2319,10 @@
                     // Still hide modal and show success even if Firebase fails
                     // This ensures the user can still access the portfolio
                     visitorModal.classList.add('hidden');
+                    
+                    // Add visitor to DOM anyway
+                    addVisitorToDOM(visitorData);
+                    
                     showNotification('Terima kasih! Anda dapat melanjutkan ke portofolio.');
                 })
                 .finally(function() {
@@ -2373,26 +2339,9 @@
                 // Clear current list
                 visitorList.innerHTML = '';
                 
-                // Show loading indicator
-                const loadingItem = document.createElement('div');
-                loadingItem.className = 'visitor-item';
-                loadingItem.innerHTML = `
-                    <div class="visitor-icon">
-                        <i class="fas fa-spinner fa-spin"></i>
-                    </div>
-                    <div class="visitor-info">
-                        <div class="visitor-name">Memuat data pengunjung...</div>
-                        <div class="visitor-time">Mohon tunggu sebentar</div>
-                    </div>
-                `;
-                visitorList.appendChild(loadingItem);
-                
                 // Get visitor data from Firebase
                 visitorsRef.orderByChild('timestamp').limitToLast(20).once('value')
                     .then(function(snapshot) {
-                        // Remove loading indicator
-                        visitorList.innerHTML = '';
-                        
                         if (!snapshot.exists()) {
                             // Show empty state
                             visitorList.innerHTML = `
@@ -2416,16 +2365,13 @@
                         });
                         visitors.reverse();
                         
-                        // Add each visitor to the list
+                        // Add each visitor to list
                         visitors.forEach(function(visitor) {
                             addVisitorToDOM(visitor);
                         });
                     })
                     .catch(function(error) {
                         console.error("Error loading visitor history: ", error);
-                        
-                        // Remove loading indicator
-                        visitorList.innerHTML = '';
                         
                         // Show error state
                         visitorList.innerHTML = `
@@ -2442,9 +2388,6 @@
                     });
             } catch (error) {
                 console.error("Error in loadVisitorHistory: ", error);
-                
-                // Remove loading indicator
-                visitorList.innerHTML = '';
                 
                 // Show error state
                 visitorList.innerHTML = `
@@ -2480,7 +2423,12 @@
                     </div>
                 `;
                 
-                visitorList.appendChild(visitorItem);
+                // Add to the beginning of the list if list is not empty
+                if (visitorList.firstChild && !visitorList.firstChild.querySelector('.fa-info-circle')) {
+                    visitorList.insertBefore(visitorItem, visitorList.firstChild);
+                } else {
+                    visitorList.appendChild(visitorItem);
+                }
             } catch (error) {
                 console.error("Error adding visitor to DOM: ", error);
             }
@@ -2527,26 +2475,9 @@
                 // Clear current list
                 messageList.innerHTML = '';
                 
-                // Show loading indicator
-                const loadingItem = document.createElement('div');
-                loadingItem.className = 'message-item';
-                loadingItem.innerHTML = `
-                    <div class="message-header">
-                        <div class="message-name">Memuat pesan...</div>
-                        <div class="message-time">Mohon tunggu sebentar</div>
-                    </div>
-                    <div class="message-content">
-                        <i class="fas fa-spinner fa-spin"></i> Sedang memuat data dari server
-                    </div>
-                `;
-                messageList.appendChild(loadingItem);
-                
                 // Get message data from Firebase
                 messagesRef.orderByChild('timestamp').limitToLast(20).once('value')
                     .then(function(snapshot) {
-                        // Remove loading indicator
-                        messageList.innerHTML = '';
-                        
                         if (!snapshot.exists()) {
                             // Show empty state
                             messageList.innerHTML = `
@@ -2570,16 +2501,13 @@
                         });
                         messages.reverse();
                         
-                        // Add each message to the list
+                        // Add each message to list
                         messages.forEach(function(message) {
                             addMessageToDOM(message);
                         });
                     })
                     .catch(function(error) {
                         console.error("Error loading messages: ", error);
-                        
-                        // Remove loading indicator
-                        messageList.innerHTML = '';
                         
                         // Show error state
                         messageList.innerHTML = `
@@ -2596,9 +2524,6 @@
                     });
             } catch (error) {
                 console.error("Error in loadMessages: ", error);
-                
-                // Remove loading indicator
-                messageList.innerHTML = '';
                 
                 // Show error state
                 messageList.innerHTML = `
@@ -3083,7 +3008,7 @@
             }
         });
         
-        // Volume control
+               // Volume control
         volumeSlider.addEventListener('input', () => {
             audio.volume = volumeSlider.value / 100;
         });
