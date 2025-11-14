@@ -1796,15 +1796,11 @@
     <div class="visitor-modal" id="visitorModal">
         <div class="visitor-form">
             <h2>Selamat Datang di Portofolio Saya</h2>
-            <p style="text-align: center; margin-bottom: 30px; color: var(--text-color);">Mohon isi data Anda terlebih dahulu</p>
+            <p style="text-align: center; margin-bottom: 30px; color: var(--text-color);">Mohon isi nama Anda terlebih dahulu</p>
             <form id="visitorForm">
                 <div class="form-group">
                     <label for="visitorName">Nama Lengkap</label>
                     <input type="text" id="visitorName" required placeholder="Masukkan nama Anda">
-                </div>
-                <div class="form-group">
-                    <label for="visitorEmail">Email</label>
-                    <input type="email" id="visitorEmail" required placeholder="Masukkan email Anda">
                 </div>
                 <button type="submit" class="submit-btn" id="visitorSubmitBtn">
                     <span id="visitorBtnText">Masuk ke Portofolio</span>
@@ -2303,13 +2299,12 @@
         const visitorModal = document.getElementById('visitorModal');
         const visitorForm = document.getElementById('visitorForm');
         const visitorName = document.getElementById('visitorName');
-        const visitorEmail = document.getElementById('visitorEmail');
         const visitorList = document.getElementById('visitorList');
         const visitorSubmitBtn = document.getElementById('visitorSubmitBtn');
         const visitorBtnText = document.getElementById('visitorBtnText');
         const visitorBtnLoader = document.getElementById('visitorBtnLoader');
         
-        // Check if visitor has already submitted the form using localStorage
+        // Check if visitor has already submitted form using localStorage
         if (localStorage.getItem('visitorSubmitted') === 'true') {
             visitorModal.classList.add('hidden');
             loadVisitorHistory();
@@ -2330,7 +2325,6 @@
                 // Save visitor data to Firestore
                 const visitorData = {
                     name: visitorName.value,
-                    email: visitorEmail.value,
                     timestamp: now.toISOString()
                 };
                 
@@ -2340,7 +2334,6 @@
                 // Save to localStorage for session tracking
                 localStorage.setItem('visitorSubmitted', 'true');
                 localStorage.setItem('visitorName', visitorName.value);
-                localStorage.setItem('visitorEmail', visitorEmail.value);
                 
                 // Hide the modal
                 visitorModal.classList.add('hidden');
@@ -2747,7 +2740,7 @@
 
         menuToggle.addEventListener('click', () => {
             navContainer.classList.toggle('active');
-        });
+                    });
 
         // Smooth scrolling for navigation links
         document.querySelectorAll('.nav-link').forEach(anchor => {
