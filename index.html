@@ -2219,6 +2219,9 @@
     </footer>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
         // Initialize AOS
         AOS.init({
@@ -2272,6 +2275,23 @@
             }, 3000);
         }
 
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQgyNklQVIjkHXNNy6UWnB_mye2_ljQJw",
+            authDomain: "portofolio-wan2121.firebaseapp.com",
+            databaseURL: "https://portofolio-wan2121-default-rtdb.firebaseio.com",
+            projectId: "portofolio-wan2121",
+            storageBucket: "portofolio-wan2121.appspot.com",
+            messagingSenderId: "795394025066",
+            appId: "1:795394025066:web:90cbea07cd94ef4d1b0c13"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const visitorsRef = database.ref('pengunjung');
+        const messagesRef = database.ref('pesan');
+
         // Visitor Form - Perbaikan
         const visitorModal = document.getElementById('visitorModal');
         const visitorForm = document.getElementById('visitorForm');
@@ -2317,204 +2337,114 @@
             localStorage.setItem('visitorSubmitted', 'true');
             localStorage.setItem('visitorName', nameValue);
             
-            // Save visitor data to Firestore with proper error handling
-            try {
-                // Initialize Firebase if not already initialized
-                if (!window.firebaseInitialized) {
-                    initializeFirebase();
-                }
-                
-                // Add to Firestore
-                if (window.db) {
-                    window.firestore.collection(window.db, "visitors")
-                        .add(visitorData)
-                        .then(function(docRef) {
-                            console.log("Document written with ID: ", docRef.id);
-                            
-                            // Hide the modal
-                            visitorModal.classList.add('hidden');
-                            
-                            // Load visitor history
-                            loadVisitorHistory();
-                            
-                            // Show success notification
-                            showNotification('Terima kasih! Data Anda telah tersimpan.');
-                        })
-                        .catch(function(error) {
-                            console.error("Error adding document: ", error);
-                            
-                            // Still hide modal and show success even if Firebase fails
-                            // This ensures the user can still access the portfolio
-                            visitorModal.classList.add('hidden');
-                            showNotification('Terima kasih! Anda dapat melanjutkan ke portofolio.');
-                        });
-                } else {
-                    // If Firebase is not available, just use localStorage
+            // Save visitor data to Firebase Realtime Database
+            visitorsRef.push(visitorData)
+                .then(function() {
+                    console.log("Visitor data saved successfully");
+                    
+                    // Hide the modal
                     visitorModal.classList.add('hidden');
+                    
+                    // Load visitor history
+                    loadVisitorHistory();
+                    
+                    // Show success notification
                     showNotification('Terima kasih! Data Anda telah tersimpan.');
-                }
-            } catch (error) {
-                console.error("Error in visitor form submission: ", error);
-                
-                // Still hide modal and show success even if there's an error
-                visitorModal.classList.add('hidden');
-                showNotification('Terima kasih! Anda dapat melanjutkan ke portofolio.');
-            } finally {
-                // Reset button state
-                visitorBtnText.style.display = 'inline';
-                visitorBtnLoader.style.display = 'none';
-                visitorSubmitBtn.disabled = false;
-            }
+                })
+                .catch(function(error) {
+                    console.error("Error saving visitor data: ", error);
+                    
+                    // Still hide modal and show success even if Firebase fails
+                    // This ensures the user can still access the portfolio
+                    visitorModal.classList.add('hidden');
+                    showNotification('Terima kasih! Anda dapat melanjutkan ke portofolio.');
+                })
+                .finally(function() {
+                    // Reset button state
+                    visitorBtnText.style.display = 'inline';
+                    visitorBtnLoader.style.display = 'none';
+                    visitorSubmitBtn.disabled = false;
+                });
         });
 
-        // Initialize Firebase with proper error handling
-        function initializeFirebase() {
-            try {
-                // Load Firebase scripts dynamically
-                const appScript = document.createElement('script');
-                appScript.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-                document.head.appendChild(appScript);
-                
-                const firestoreScript = document.createElement('script');
-                firestoreScript.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-                document.head.appendChild(firestoreScript);
-                
-                // Wait for scripts to load
-                appScript.onload = function() {
-                    firestoreScript.onload = function() {
-                        try {
-                            // Your web app's Firebase configuration
-                            const firebaseConfig = {
-                                apiKey: "AIzaSyDQgyNklQVIjkHXNNy6UWnB_mye2_ljQJw",
-                                authDomain: "portofolio-wan2121.firebaseapp.com",
-                                projectId: "portofolio-wan2121",
-                                storageBucket: "portofolio-wan2121.firebasestorage.app",
-                                messagingSenderId: "795394025066",
-                                appId: "1:795394025066:web:90cbea07cd94ef4d1b0c13",
-                                measurementId: "G-RW2BPR99Y2"
-                            };
-                            
-                            // Initialize Firebase
-                            const app = window.firebase.initializeApp(firebaseConfig);
-                            window.db = window.firebase.getFirestore(app);
-                            window.firestore = window.firebase;
-                            window.firebaseInitialized = true;
-                            
-                            console.log("Firebase initialized successfully");
-                        } catch (error) {
-                            console.error("Error initializing Firebase: ", error);
-                            window.firebaseInitialized = false;
-                        }
-                    };
-                };
-            } catch (error) {
-                console.error("Error loading Firebase scripts: ", error);
-                window.firebaseInitialized = false;
-            }
-        }
-
-        // Load visitor history from Firestore or localStorage
+        // Load visitor history from Firebase Realtime Database
         function loadVisitorHistory() {
             try {
                 // Clear current list
                 visitorList.innerHTML = '';
                 
-                // If Firebase is available, use it
-                if (window.db && window.firestore) {
-                    try {
-                        // Create a query to get the last 20 visitors, ordered by timestamp (newest first)
-                        const q = window.firestore.query(
-                            window.firestore.collection(window.db, "visitors"),
-                            window.firestore.orderBy("timestamp", "desc"),
-                            window.firestore.limit(20)
-                        );
+                // Show loading indicator
+                const loadingItem = document.createElement('div');
+                loadingItem.className = 'visitor-item';
+                loadingItem.innerHTML = `
+                    <div class="visitor-icon">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <div class="visitor-info">
+                        <div class="visitor-name">Memuat data pengunjung...</div>
+                        <div class="visitor-time">Mohon tunggu sebentar</div>
+                    </div>
+                `;
+                visitorList.appendChild(loadingItem);
+                
+                // Get visitor data from Firebase
+                visitorsRef.orderByChild('timestamp').limitToLast(20).once('value')
+                    .then(function(snapshot) {
+                        // Remove loading indicator
+                        visitorList.innerHTML = '';
                         
-                        window.firestore.getDocs(q)
-                            .then(function(querySnapshot) {
-                                if (querySnapshot.empty) {
-                                    // Show empty state
-                                    visitorList.innerHTML = `
-                                        <div class="visitor-item">
-                                            <div class="visitor-icon">
-                                                <i class="fas fa-info-circle"></i>
-                                            </div>
-                                            <div class="visitor-info">
-                                                <div class="visitor-name">Belum ada pengunjung</div>
-                                                <div class="visitor-time">Jadilah yang pertama mengisi buku tamu!</div>
-                                            </div>
-                                        </div>
-                                    `;
-                                    return;
-                                }
-                                
-                                // Add each visitor to the list
-                                querySnapshot.forEach(function(doc) {
-                                    const visitor = doc.data();
-                                    addVisitorToDOM(visitor);
-                                });
-                            })
-                            .catch(function(error) {
-                                console.error("Error loading visitor history: ", error);
-                                // Fall back to localStorage
-                                loadVisitorHistoryFromLocalStorage();
-                            });
-                    } catch (error) {
-                        console.error("Error with Firestore query: ", error);
-                        // Fall back to localStorage
-                        loadVisitorHistoryFromLocalStorage();
-                    }
-                } else {
-                    // Fall back to localStorage
-                    loadVisitorHistoryFromLocalStorage();
-                }
+                        if (!snapshot.exists()) {
+                            // Show empty state
+                            visitorList.innerHTML = `
+                                <div class="visitor-item">
+                                    <div class="visitor-icon">
+                                        <i class="fas fa-info-circle"></i>
+                                    </div>
+                                    <div class="visitor-info">
+                                        <div class="visitor-name">Belum ada pengunjung</div>
+                                        <div class="visitor-time">Jadilah yang pertama mengisi buku tamu!</div>
+                                    </div>
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        // Convert to array and reverse to show newest first
+                        const visitors = [];
+                        snapshot.forEach(function(childSnapshot) {
+                            visitors.push(childSnapshot.val());
+                        });
+                        visitors.reverse();
+                        
+                        // Add each visitor to the list
+                        visitors.forEach(function(visitor) {
+                            addVisitorToDOM(visitor);
+                        });
+                    })
+                    .catch(function(error) {
+                        console.error("Error loading visitor history: ", error);
+                        
+                        // Remove loading indicator
+                        visitorList.innerHTML = '';
+                        
+                        // Show error state
+                        visitorList.innerHTML = `
+                            <div class="visitor-item">
+                                <div class="visitor-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="visitor-info">
+                                    <div class="visitor-name">Gagal memuat data</div>
+                                    <div class="visitor-time">Silakan refresh halaman</div>
+                                </div>
+                            </div>
+                        `;
+                    });
             } catch (error) {
                 console.error("Error in loadVisitorHistory: ", error);
-                // Fall back to localStorage
-                loadVisitorHistoryFromLocalStorage();
-            }
-        }
-
-        // Load visitor history from localStorage as fallback
-        function loadVisitorHistoryFromLocalStorage() {
-            try {
-                // Clear current list
+                
+                // Remove loading indicator
                 visitorList.innerHTML = '';
-                
-                // Get visitor name from localStorage
-                const visitorName = localStorage.getItem('visitorName');
-                
-                if (visitorName) {
-                    // Create a visitor item
-                    const visitorItem = document.createElement('div');
-                    visitorItem.className = 'visitor-item';
-                    
-                    visitorItem.innerHTML = `
-                        <div class="visitor-icon">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="visitor-info">
-                            <div class="visitor-name">${visitorName}</div>
-                            <div class="visitor-time">Pengunjung terakhir</div>
-                        </div>
-                    `;
-                    
-                    visitorList.appendChild(visitorItem);
-                } else {
-                    // Show empty state
-                    visitorList.innerHTML = `
-                        <div class="visitor-item">
-                            <div class="visitor-icon">
-                                <i class="fas fa-info-circle"></i>
-                            </div>
-                            <div class="visitor-info">
-                                <div class="visitor-name">Belum ada pengunjung</div>
-                                <div class="visitor-time">Jadilah yang pertama mengisi buku tamu!</div>
-                            </div>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error("Error loading visitor history from localStorage: ", error);
                 
                 // Show error state
                 visitorList.innerHTML = `
@@ -2573,9 +2503,14 @@
             }
         }
 
-        // Initialize Firebase on page load
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            initializeFirebase();
+            // Load visitor history if visitor has already submitted form
+            if (localStorage.getItem('visitorSubmitted') === 'true') {
+                loadVisitorHistory();
+            }
+            
+            // Load messages
             loadMessages();
         });
 
@@ -2586,63 +2521,66 @@
         const messageBtnText = document.getElementById('messageBtnText');
         const messageBtnLoader = document.getElementById('messageBtnLoader');
         
-        // Load messages from Firestore
+        // Load messages from Firebase Realtime Database
         function loadMessages() {
             try {
                 // Clear current list
                 messageList.innerHTML = '';
                 
-                // If Firebase is available, use it
-                if (window.db && window.firestore) {
-                    try {
-                        // Create a query to get the last 20 messages, ordered by timestamp (newest first)
-                        const q = window.firestore.query(
-                            window.firestore.collection(window.db, "messages"),
-                            window.firestore.orderBy("timestamp", "desc"),
-                            window.firestore.limit(20)
-                        );
+                // Show loading indicator
+                const loadingItem = document.createElement('div');
+                loadingItem.className = 'message-item';
+                loadingItem.innerHTML = `
+                    <div class="message-header">
+                        <div class="message-name">Memuat pesan...</div>
+                        <div class="message-time">Mohon tunggu sebentar</div>
+                    </div>
+                    <div class="message-content">
+                        <i class="fas fa-spinner fa-spin"></i> Sedang memuat data dari server
+                    </div>
+                `;
+                messageList.appendChild(loadingItem);
+                
+                // Get message data from Firebase
+                messagesRef.orderByChild('timestamp').limitToLast(20).once('value')
+                    .then(function(snapshot) {
+                        // Remove loading indicator
+                        messageList.innerHTML = '';
                         
-                        window.firestore.getDocs(q)
-                            .then(function(querySnapshot) {
-                                if (querySnapshot.empty) {
-                                    // Show empty state
-                                    messageList.innerHTML = `
-                                        <div class="message-item">
-                                            <div class="message-header">
-                                                <div class="message-name">Belum ada pesan</div>
-                                                <div class="message-time">-</div>
-                                            </div>
-                                            <div class="message-content">
-                                                Jadilah yang pertama meninggalkan pesan!
-                                            </div>
-                                        </div>
-                                    `;
-                                    return;
-                                }
-                                
-                                // Add each message to the list
-                                querySnapshot.forEach(function(doc) {
-                                    const message = doc.data();
-                                    addMessageToDOM(message);
-                                });
-                            })
-                            .catch(function(error) {
-                                console.error("Error loading messages: ", error);
-                                // Show error state
-                                messageList.innerHTML = `
-                                    <div class="message-item">
-                                        <div class="message-header">
-                                            <div class="message-name">Gagal memuat pesan</div>
-                                            <div class="message-time">-</div>
-                                        </div>
-                                        <div class="message-content">
-                                            Silakan refresh halaman untuk mencoba lagi
-                                        </div>
+                        if (!snapshot.exists()) {
+                            // Show empty state
+                            messageList.innerHTML = `
+                                <div class="message-item">
+                                    <div class="message-header">
+                                        <div class="message-name">Belum ada pesan</div>
+                                        <div class="message-time">-</div>
                                     </div>
-                                `;
-                            });
-                    } catch (error) {
-                        console.error("Error with Firestore query: ", error);
+                                    <div class="message-content">
+                                        Jadilah yang pertama meninggalkan pesan!
+                                    </div>
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        // Convert to array and reverse to show newest first
+                        const messages = [];
+                        snapshot.forEach(function(childSnapshot) {
+                            messages.push(childSnapshot.val());
+                        });
+                        messages.reverse();
+                        
+                        // Add each message to the list
+                        messages.forEach(function(message) {
+                            addMessageToDOM(message);
+                        });
+                    })
+                    .catch(function(error) {
+                        console.error("Error loading messages: ", error);
+                        
+                        // Remove loading indicator
+                        messageList.innerHTML = '';
+                        
                         // Show error state
                         messageList.innerHTML = `
                             <div class="message-item">
@@ -2655,23 +2593,13 @@
                                 </div>
                             </div>
                         `;
-                    }
-                } else {
-                    // Show empty state
-                    messageList.innerHTML = `
-                        <div class="message-item">
-                            <div class="message-header">
-                                <div class="message-name">Belum ada pesan</div>
-                                <div class="message-time">-</div>
-                            </div>
-                            <div class="message-content">
-                                Jadilah yang pertama meninggalkan pesan!
-                            </div>
-                        </div>
-                    `;
-                }
+                    });
             } catch (error) {
                 console.error("Error in loadMessages: ", error);
+                
+                // Remove loading indicator
+                messageList.innerHTML = '';
+                
                 // Show error state
                 messageList.innerHTML = `
                     <div class="message-item">
@@ -2740,40 +2668,38 @@
                     timestamp: now.toISOString()
                 };
                 
-                // Add to Firestore if available
-                if (window.db && window.firestore) {
-                    window.firestore.collection(window.db, "messages")
-                        .add(message)
-                        .then(function(docRef) {
-                            console.log("Message document written with ID: ", docRef.id);
-                            
-                            // Add message to DOM
-                            addMessageToDOM(message);
-                            
-                            // Reset form
-                            messageForm.reset();
-                            
-                            // Show success message
-                            showNotification('Pesan Anda telah berhasil dikirim!');
-                        })
-                        .catch(function(error) {
-                            console.error("Error adding message: ", error);
-                            
-                            // Still add to DOM and show success even if Firebase fails
-                            addMessageToDOM(message);
-                            messageForm.reset();
-                            showNotification('Pesan Anda telah berhasil dikirim!');
-                        });
-                } else {
-                    // If Firebase is not available, just add to DOM
-                    addMessageToDOM(message);
-                    messageForm.reset();
-                    showNotification('Pesan Anda telah berhasil dikirim!');
-                }
+                // Add to Firebase Realtime Database
+                messagesRef.push(message)
+                    .then(function() {
+                        console.log("Message saved successfully");
+                        
+                        // Add message to DOM
+                        addMessageToDOM(message);
+                        
+                        // Reset form
+                        messageForm.reset();
+                        
+                        // Show success message
+                        showNotification('Pesan Anda telah berhasil dikirim!');
+                    })
+                    .catch(function(error) {
+                        console.error("Error saving message: ", error);
+                        
+                        // Still add to DOM and show success even if Firebase fails
+                        addMessageToDOM(message);
+                        messageForm.reset();
+                        showNotification('Pesan Anda telah berhasil dikirim!');
+                    })
+                    .finally(function() {
+                        // Reset button state
+                        messageBtnText.style.display = 'inline';
+                        messageBtnLoader.style.display = 'none';
+                        messageSubmitBtn.disabled = false;
+                    });
             } catch (error) {
                 console.error("Error in message form submission: ", error);
                 showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
-            } finally {
+                
                 // Reset button state
                 messageBtnText.style.display = 'inline';
                 messageBtnLoader.style.display = 'none';
