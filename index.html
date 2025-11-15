@@ -1765,6 +1765,20 @@
             color: var(--accent);
             font-style: italic;
         }
+
+        /* Debug info */
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10000;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -1776,6 +1790,9 @@
     <div class="loader" id="loader">
         <div class="loader-circle"></div>
     </div>
+
+    <!-- Debug Info (hidden by default) -->
+    <div class="debug-info" id="debugInfo"></div>
 
     <!-- Visitor Form Modal -->
     <div class="visitor-modal" id="visitorModal">
@@ -2242,6 +2259,19 @@
             }, 3000);
         }
 
+        // Debug function
+        function debugLog(message) {
+            console.log(message);
+            const debugInfo = document.getElementById('debugInfo');
+            if (debugInfo) {
+                debugInfo.textContent = message;
+                debugInfo.style.display = 'block';
+                setTimeout(() => {
+                    debugInfo.style.display = 'none';
+                }, 5000);
+            }
+        }
+
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDQgyNklQVIjkHXNNy6UWnB_mye2_ljQJw",
@@ -2253,10 +2283,19 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        let db;
+        let firestoreAvailable = false;
         
-        // Initialize Firestore
-        const db = firebase.firestore();
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            firestoreAvailable = true;
+            debugLog("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+            firestoreAvailable = false;
+            debugLog("Firebase initialization failed");
+        }
         
         // Visitor Form - Perbaikan
         const visitorModal = document.getElementById('visitorModal');
@@ -2291,18 +2330,26 @@
             visitorBtnLoader.style.display = 'inline-block';
             visitorSubmitBtn.disabled = true;
             
+            // Create visitor data object
+            const visitorData = {
+                name: nameValue,
+                timestamp: firestoreAvailable ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
+            };
+            
+            debugLog("Attempting to save visitor data");
+            
             try {
-                // Create visitor data object with serverTimestamp
-                const visitorData = {
-                    name: nameValue,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                console.log('Saving visitor data:', visitorData);
-                
-                // Save visitor data to Firestore
-                const docRef = await db.collection('visitors').add(visitorData);
-                console.log('Visitor data saved with ID:', docRef.id);
+                if (firestoreAvailable) {
+                    // Save to Firestore
+                    const docRef = await db.collection('visitors').add(visitorData);
+                    debugLog(`Visitor data saved with ID: ${docRef.id}`);
+                } else {
+                    // Fallback to localStorage
+                    let visitors = JSON.parse(localStorage.getItem('visitors') || '[]');
+                    visitors.push({...visitorData, id: Date.now().toString()});
+                    localStorage.setItem('visitors', JSON.stringify(visitors));
+                    debugLog("Visitor data saved to localStorage");
+                }
                 
                 // Save to localStorage for session tracking
                 localStorage.setItem('visitorSubmitted', 'true');
@@ -2318,12 +2365,35 @@
                 showNotification('Terima kasih! Data Anda telah tersimpan.');
             } catch (error) {
                 console.error('Error saving visitor data:', error);
+                debugLog(`Error: ${error.message}`);
                 
-                // Show error notification
-                showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
-                
-                // Don't set visitorSubmitted flag on error
-                // Don't hide modal on error
+                // Fallback to localStorage on error
+                try {
+                    let visitors = JSON.parse(localStorage.getItem('visitors') || '[]');
+                    visitors.push({...visitorData, id: Date.now().toString()});
+                    localStorage.setItem('visitors', JSON.stringify(visitors));
+                    
+                    // Save to localStorage for session tracking
+                    localStorage.setItem('visitorSubmitted', 'true');
+                    localStorage.setItem('visitorName', nameValue);
+                    
+                    // Hide the modal
+                    visitorModal.classList.add('hidden');
+                    
+                    // Load visitor history to refresh the list
+                    await loadVisitorHistory();
+                    
+                    showNotification('Terima kasih! Data Anda telah tersimpan (mode offline).');
+                } catch (localError) {
+                    console.error('Error saving to localStorage:', localError);
+                    
+                    // Still allow user to proceed even if saving fails
+                    localStorage.setItem('visitorSubmitted', 'true');
+                    localStorage.setItem('visitorName', nameValue);
+                    visitorModal.classList.add('hidden');
+                    
+                    showNotification('Terima kasih! Anda dapat melanjutkan ke portofolio.');
+                }
             } finally {
                 // Reset button state
                 visitorBtnText.style.display = 'inline';
@@ -2332,7 +2402,7 @@
             }
         });
 
-        // Load visitor history from Firestore
+        // Load visitor history from Firestore or localStorage
         async function loadVisitorHistory() {
             try {
                 // Show loading text
@@ -2344,18 +2414,41 @@
                 const items = visitorList.querySelectorAll('.visitor-item');
                 items.forEach(item => item.remove());
                 
-                // Get visitor data from Firestore
-                const querySnapshot = await db.collection('visitors')
-                    .orderBy('timestamp', 'desc')
-                    .limit(20)
-                    .get();
+                let visitors = [];
+                
+                if (firestoreAvailable) {
+                    try {
+                        // Get visitor data from Firestore
+                        const querySnapshot = await db.collection('visitors')
+                            .orderBy('timestamp', 'desc')
+                            .limit(20)
+                            .get();
+                        
+                        querySnapshot.forEach((doc) => {
+                            visitors.push({id: doc.id, ...doc.data()});
+                        });
+                        debugLog(`Loaded ${visitors.length} visitors from Firestore`);
+                    } catch (firestoreError) {
+                        console.error('Error loading from Firestore:', firestoreError);
+                        debugLog('Falling back to localStorage');
+                        
+                        // Fallback to localStorage
+                        visitors = JSON.parse(localStorage.getItem('visitors') || '[]');
+                        visitors.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    }
+                } else {
+                    // Load from localStorage
+                    visitors = JSON.parse(localStorage.getItem('visitors') || '[]');
+                    visitors.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    debugLog(`Loaded ${visitors.length} visitors from localStorage`);
+                }
                 
                 // Hide loading text
                 if (visitorLoadingText) {
                     visitorLoadingText.style.display = 'none';
                 }
                 
-                if (querySnapshot.empty) {
+                if (visitors.length === 0) {
                     // Show empty state
                     visitorList.innerHTML = `
                         <div class="visitor-item">
@@ -2372,12 +2465,12 @@
                 }
                 
                 // Add each visitor to list
-                querySnapshot.forEach((doc) => {
-                    const visitor = doc.data();
-                    addVisitorToDOM(visitor, doc.id);
+                visitors.forEach((visitor) => {
+                    addVisitorToDOM(visitor);
                 });
             } catch (error) {
                 console.error('Error loading visitor history:', error);
+                debugLog(`Error loading: ${error.message}`);
                 
                 // Hide loading text
                 if (visitorLoadingText) {
@@ -2400,11 +2493,11 @@
         }
 
         // Add visitor to DOM
-        function addVisitorToDOM(visitor, docId) {
+        function addVisitorToDOM(visitor) {
             try {
                 const visitorItem = document.createElement('div');
                 visitorItem.className = 'visitor-item';
-                visitorItem.setAttribute('data-id', docId);
+                visitorItem.setAttribute('data-id', visitor.id);
                 
                 // Check if timestamp exists
                 let formattedDate = "Waktu tidak tersedia";
@@ -2469,19 +2562,39 @@
         const messageBtnText = document.getElementById('messageBtnText');
         const messageBtnLoader = document.getElementById('messageBtnLoader');
         
-        // Load messages from Firestore
+        // Load messages from Firestore or localStorage
         async function loadMessages() {
             try {
                 // Clear current list
                 messageList.innerHTML = '';
                 
-                // Get message data from Firestore
-                const querySnapshot = await db.collection('messages')
-                    .orderBy('timestamp', 'desc')
-                    .limit(20)
-                    .get();
+                let messages = [];
                 
-                if (querySnapshot.empty) {
+                if (firestoreAvailable) {
+                    try {
+                        // Get message data from Firestore
+                        const querySnapshot = await db.collection('messages')
+                            .orderBy('timestamp', 'desc')
+                            .limit(20)
+                            .get();
+                        
+                        querySnapshot.forEach((doc) => {
+                            messages.push({id: doc.id, ...doc.data()});
+                        });
+                    } catch (firestoreError) {
+                        console.error('Error loading messages from Firestore:', firestoreError);
+                        
+                        // Fallback to localStorage
+                        messages = JSON.parse(localStorage.getItem('messages') || '[]');
+                        messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    }
+                } else {
+                    // Load from localStorage
+                    messages = JSON.parse(localStorage.getItem('messages') || '[]');
+                    messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                }
+                
+                if (messages.length === 0) {
                     // Show empty state
                     messageList.innerHTML = `
                         <div class="message-item">
@@ -2498,9 +2611,8 @@
                 }
                 
                 // Add each message to list
-                querySnapshot.forEach((doc) => {
-                    const message = doc.data();
-                    addMessageToDOM(message, doc.id);
+                messages.forEach((message) => {
+                    addMessageToDOM(message);
                 });
             } catch (error) {
                 console.error("Error loading messages: ", error);
@@ -2521,11 +2633,11 @@
         }
         
         // Add message to DOM
-        function addMessageToDOM(message, docId) {
+        function addMessageToDOM(message) {
             try {
                 const messageItem = document.createElement('div');
                 messageItem.className = 'message-item';
-                messageItem.setAttribute('data-id', docId);
+                messageItem.setAttribute('data-id', message.id);
                 
                 // Check if timestamp exists
                 let formattedDate = "Waktu tidak tersedia";
@@ -2584,21 +2696,27 @@
                     return;
                 }
                 
-                // Create message object with serverTimestamp
+                // Create message object
                 const message = {
                     name: messageName,
                     content: messageContent,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    timestamp: firestoreAvailable ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
                 };
                 
-                console.log('Saving message:', message);
-                
-                // Add to Firestore
-                const docRef = await db.collection('messages').add(message);
-                console.log('Message saved with ID:', docRef.id);
+                if (firestoreAvailable) {
+                    // Add to Firestore
+                    const docRef = await db.collection('messages').add(message);
+                    message.id = docRef.id;
+                } else {
+                    // Fallback to localStorage
+                    let messages = JSON.parse(localStorage.getItem('messages') || '[]');
+                    message.id = Date.now().toString();
+                    messages.unshift(message);
+                    localStorage.setItem('messages', JSON.stringify(messages));
+                }
                 
                 // Add message to DOM
-                addMessageToDOM(message, docRef.id);
+                addMessageToDOM(message);
                 
                 // Reset form
                 messageForm.reset();
@@ -2607,7 +2725,34 @@
                 showNotification('Pesan Anda telah berhasil dikirim!');
             } catch (error) {
                 console.error("Error saving message: ", error);
-                showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+                
+                // Fallback to localStorage on error
+                try {
+                    const messageName = document.getElementById('messageName').value.trim();
+                    const messageContent = document.getElementById('messageContent').value.trim();
+                    
+                    const message = {
+                        id: Date.now().toString(),
+                        name: messageName,
+                        content: messageContent,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    let messages = JSON.parse(localStorage.getItem('messages') || '[]');
+                    messages.unshift(message);
+                    localStorage.setItem('messages', JSON.stringify(messages));
+                    
+                    // Add message to DOM
+                    addMessageToDOM(message);
+                    
+                    // Reset form
+                    messageForm.reset();
+                    
+                    showNotification('Pesan Anda telah berhasil dikirim (mode offline).');
+                } catch (localError) {
+                    console.error("Error saving to localStorage:", localError);
+                    showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+                }
             } finally {
                 // Reset button state
                 messageBtnText.style.display = 'inline';
