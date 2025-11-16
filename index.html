@@ -2297,114 +2297,50 @@
             debugLog("Firebase initialization failed");
         }
         
-        // Visitor Form - Perbaikan
-        const visitorModal = document.getElementById('visitorModal');
-        const visitorForm = document.getElementById('visitorForm');
-        const visitorName = document.getElementById('visitorName');
-        const visitorList = document.getElementById('visitorList');
-        const visitorSubmitBtn = document.getElementById('visitorSubmitBtn');
-        const visitorBtnText = document.getElementById('visitorBtnText');
-        const visitorBtnLoader = document.getElementById('visitorBtnLoader');
-        const visitorLoadingText = document.getElementById('visitorLoadingText');
-        
-        // Check if visitor has already submitted form using localStorage
-        if (localStorage.getItem('visitorSubmitted') === 'true') {
-            visitorModal.classList.add('hidden');
-            loadVisitorHistory();
-        }
-        
-        visitorForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Get visitor name from input
-            const nameValue = visitorName.value.trim();
-            
-            // Validate input
-            if (!nameValue) {
-                showNotification('Silakan masukkan nama Anda', 'error');
-                return;
-            }
-            
-            // Show loading state
-            visitorBtnText.style.display = 'none';
-            visitorBtnLoader.style.display = 'inline-block';
-            visitorSubmitBtn.disabled = true;
-            
-            // Create visitor data object
-            const visitorData = {
-                name: nameValue,
-                timestamp: firestoreAvailable ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
-            };
-            
-            debugLog("Attempting to save visitor data");
-            
+        // Function to save visitor data to Firestore
+        async function saveVisitor(name) {
             try {
-                if (firestoreAvailable) {
-                    // Save to Firestore
-                    const docRef = await db.collection('visitors').add(visitorData);
-                    debugLog(`Visitor data saved with ID: ${docRef.id}`);
-                } else {
-                    // Fallback to localStorage
-                    let visitors = JSON.parse(localStorage.getItem('visitors') || '[]');
-                    visitors.push({...visitorData, id: Date.now().toString()});
-                    localStorage.setItem('visitors', JSON.stringify(visitors));
-                    debugLog("Visitor data saved to localStorage");
+                if (!firestoreAvailable) {
+                    throw new Error("Firestore is not available");
                 }
                 
-                // Save to localStorage for session tracking
-                localStorage.setItem('visitorSubmitted', 'true');
-                localStorage.setItem('visitorName', nameValue);
+                const visitorData = {
+                    name: name,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
                 
-                // Hide the modal
-                visitorModal.classList.add('hidden');
-                
-                // Load visitor history to refresh the list
-                await loadVisitorHistory();
-                
-                // Show success notification
-                showNotification('Terima kasih! Data Anda telah tersimpan.');
+                const docRef = await db.collection('visitors').add(visitorData);
+                debugLog(`Visitor data saved with ID: ${docRef.id}`);
+                return { success: true, id: docRef.id };
             } catch (error) {
-                console.error('Error saving visitor data:', error);
-                debugLog(`Error: ${error.message}`);
+                console.error("Error saving visitor data:", error);
+                debugLog(`Error saving visitor: ${error.message}`);
                 
-                // Fallback to localStorage on error
+                // Fallback to localStorage
                 try {
                     let visitors = JSON.parse(localStorage.getItem('visitors') || '[]');
-                    visitors.push({...visitorData, id: Date.now().toString()});
+                    const visitorData = {
+                        id: Date.now().toString(),
+                        name: name,
+                        timestamp: new Date().toISOString()
+                    };
+                    visitors.push(visitorData);
                     localStorage.setItem('visitors', JSON.stringify(visitors));
-                    
-                    // Save to localStorage for session tracking
-                    localStorage.setItem('visitorSubmitted', 'true');
-                    localStorage.setItem('visitorName', nameValue);
-                    
-                    // Hide the modal
-                    visitorModal.classList.add('hidden');
-                    
-                    // Load visitor history to refresh the list
-                    await loadVisitorHistory();
-                    
-                    showNotification('Terima kasih! Data Anda telah tersimpan (mode offline).');
+                    debugLog("Visitor data saved to localStorage");
+                    return { success: true, id: visitorData.id, fallback: true };
                 } catch (localError) {
-                    console.error('Error saving to localStorage:', localError);
-                    
-                    // Still allow user to proceed even if saving fails
-                    localStorage.setItem('visitorSubmitted', 'true');
-                    localStorage.setItem('visitorName', nameValue);
-                    visitorModal.classList.add('hidden');
-                    
-                    showNotification('Terima kasih! Anda dapat melanjutkan ke portofolio.');
+                    console.error("Error saving to localStorage:", localError);
+                    return { success: false, error: localError.message };
                 }
-            } finally {
-                // Reset button state
-                visitorBtnText.style.display = 'inline';
-                visitorBtnLoader.style.display = 'none';
-                visitorSubmitBtn.disabled = false;
             }
-        });
-
-        // Load visitor history from Firestore or localStorage
-        async function loadVisitorHistory() {
+        }
+        
+        // Function to load visitor data from Firestore
+        async function loadVisitors() {
             try {
+                const visitorList = document.getElementById('visitorList');
+                const visitorLoadingText = document.getElementById('visitorLoadingText');
+                
                 // Show loading text
                 if (visitorLoadingText) {
                     visitorLoadingText.style.display = 'block';
@@ -2473,11 +2409,13 @@
                 debugLog(`Error loading: ${error.message}`);
                 
                 // Hide loading text
+                const visitorLoadingText = document.getElementById('visitorLoadingText');
                 if (visitorLoadingText) {
                     visitorLoadingText.style.display = 'none';
                 }
                 
                 // Show error state
+                const visitorList = document.getElementById('visitorList');
                 visitorList.innerHTML = `
                     <div class="visitor-item">
                         <div class="visitor-icon">
@@ -2495,6 +2433,7 @@
         // Add visitor to DOM
         function addVisitorToDOM(visitor) {
             try {
+                const visitorList = document.getElementById('visitorList');
                 const visitorItem = document.createElement('div');
                 visitorItem.className = 'visitor-item';
                 visitorItem.setAttribute('data-id', visitor.id);
@@ -2527,7 +2466,7 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="visitor-info">
-                        <div class="visitor-name">${visitor.name}</div>
+                        <div class="visitor-name">${visitor.name || 'Tidak diketahui'}</div>
                         <div class="visitor-time">${formattedDate}</div>
                     </div>
                 `;
@@ -2544,11 +2483,86 @@
             }
         }
 
+        // Visitor Form - Perbaikan
+        const visitorModal = document.getElementById('visitorModal');
+        const visitorForm = document.getElementById('visitorForm');
+        const visitorName = document.getElementById('visitorName');
+        const visitorSubmitBtn = document.getElementById('visitorSubmitBtn');
+        const visitorBtnText = document.getElementById('visitorBtnText');
+        const visitorBtnLoader = document.getElementById('visitorBtnLoader');
+        
+        // Check if visitor has already submitted form using localStorage
+        if (localStorage.getItem('visitorSubmitted') === 'true') {
+            visitorModal.classList.add('hidden');
+            loadVisitors();
+        }
+        
+        visitorForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get visitor name from input
+            const nameValue = visitorName.value.trim();
+            
+            // Validate input
+            if (!nameValue) {
+                showNotification('Silakan masukkan nama Anda', 'error');
+                return;
+            }
+            
+            // Show loading state
+            visitorBtnText.style.display = 'none';
+            visitorBtnLoader.style.display = 'inline-block';
+            visitorSubmitBtn.disabled = true;
+            
+            debugLog("Attempting to save visitor data");
+            
+            try {
+                // Save visitor data using the saveVisitor function
+                const result = await saveVisitor(nameValue);
+                
+                if (result.success) {
+                    // Save to localStorage for session tracking
+                    localStorage.setItem('visitorSubmitted', 'true');
+                    localStorage.setItem('visitorName', nameValue);
+                    
+                    // Hide the modal
+                    visitorModal.classList.add('hidden');
+                    
+                    // Load visitor history to refresh the list
+                    await loadVisitors();
+                    
+                    // Show success notification
+                    if (result.fallback) {
+                        showNotification('Terima kasih! Data Anda telah tersimpan (mode offline).');
+                    } else {
+                        showNotification('Terima kasih! Data Anda telah tersimpan.');
+                    }
+                } else {
+                    throw new Error(result.error || 'Failed to save visitor data');
+                }
+            } catch (error) {
+                console.error('Error saving visitor data:', error);
+                debugLog(`Error: ${error.message}`);
+                
+                // Still allow user to proceed even if saving fails
+                localStorage.setItem('visitorSubmitted', 'true');
+                localStorage.setItem('visitorName', nameValue);
+                visitorModal.classList.add('hidden');
+                
+                showNotification('Terima kasih! Anda dapat melanjutkan ke portofolio.');
+            } finally {
+                // Reset button state
+                visitorBtnText.style.display = 'inline';
+                visitorBtnLoader.style.display = 'none';
+                visitorSubmitBtn.disabled = false;
+            }
+        });
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             // Load visitor history if visitor has already submitted form
             if (localStorage.getItem('visitorSubmitted') === 'true') {
-                loadVisitorHistory();
+                loadVisitors();
             }
             
             // Load messages
@@ -2664,10 +2678,10 @@
                 
                 messageItem.innerHTML = `
                     <div class="message-header">
-                        <div class="message-name">${message.name}</div>
+                        <div class="message-name">${message.name || 'Tidak diketahui'}</div>
                         <div class="message-time">${formattedDate}</div>
                     </div>
-                    <div class="message-content">${message.content}</div>
+                    <div class="message-content">${message.content || ''}</div>
                 `;
                 
                 // Add to the beginning of the list
