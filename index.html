@@ -250,6 +250,7 @@
             visibility: visible;
         }
 
+        /* Music Toggle Button - DIPERBAIKI */
         .music-toggle {
             position: fixed;
             bottom: 30px;
@@ -262,10 +263,11 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 999;
+            z-index: 9999; /* Ditingkatkan z-index */
             box-shadow: 0 5px 15px var(--glow);
             transition: all 0.3s ease;
             border: 1px solid var(--border-color);
+            pointer-events: auto; /* Memastikan bisa diklik */
         }
 
         .music-toggle:hover {
@@ -276,6 +278,7 @@
         .music-toggle i {
             color: var(--secondary);
             font-size: 1.5rem;
+            pointer-events: none; /* Agar icon tidak mengganggu klik */
         }
 
         .music-header {
@@ -466,41 +469,6 @@
             border-radius: 50%;
             background: var(--secondary);
             cursor: pointer;
-        }
-
-        /* Back to Top Button */
-        .back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 100px;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--secondary), var(--accent));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 999;
-            box-shadow: 0 5px 15px var(--glow);
-        }
-
-        .back-to-top.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .back-to-top:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px var(--neon-glow);
-        }
-
-        .back-to-top i {
-            color: var(--primary);
-            font-size: 1.2rem;
         }
 
         /* Header & Profile Section */
@@ -1814,15 +1782,20 @@
                 font-size: 1rem;
             }
             
-            /* Music Player */
+            /* Music Player - DIPERBAIKI UNTUK MOBILE */
             .music-player {
                 width: 90%;
                 right: 5%;
                 left: 5%;
             }
             
-            .back-to-top {
+            /* Music Toggle - DIPERBAIKI UNTUK MOBILE */
+            .music-toggle {
+                bottom: 20px;
                 right: 20px;
+                width: 50px;
+                height: 50px;
+                z-index: 9999;
             }
             
             /* Hero Buttons */
@@ -1958,12 +1931,10 @@
         </div>
     </div>
 
-    <!-- Music Toggle Button -->
+    <!-- Music Toggle Button - DIJAGA AGAR TETAP BISA DIKLIK -->
     <div class="music-toggle" id="musicToggle">
         <i class="fas fa-music"></i>
     </div>
-
-    
 
     <!-- Header & Profile Section -->
     <header>
@@ -2282,7 +2253,7 @@
 
         // Add click sound to all clickable elements
         document.addEventListener('DOMContentLoaded', () => {
-            const clickableElements = document.querySelectorAll('button, a, .skill-item, .project-card, .contact-item, .social-links a, .track, .music-btn, .track-play-btn, .music-toggle, .back-to-top');
+            const clickableElements = document.querySelectorAll('button, a, .skill-item, .project-card, .contact-item, .social-links a, .track, .music-btn, .track-play-btn, .music-toggle');
             
             clickableElements.forEach(element => {
                 element.addEventListener('click', () => {
@@ -3060,24 +3031,6 @@
             });
         });
 
-        // Back to top button
-        const backToTopButton = document.getElementById('backToTop');
-        
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
-                backToTopButton.classList.add('active');
-            } else {
-                backToTopButton.classList.remove('active');
-            }
-        });
-        
-        backToTopButton.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-
         // Active navigation link on scroll
         const sections = document.querySelectorAll('section');
         const navLinks = document.querySelectorAll('.nav-link');
@@ -3102,7 +3055,7 @@
             });
         });
 
-        // Music Player - Enhanced with hidden playlist
+        // Music Player - DIPERBAIKI
         const musicPlayer = document.getElementById('musicPlayer');
         const musicToggleBtn = document.getElementById('musicToggle');
         const closePlayer = document.getElementById('closePlayer');
@@ -3229,14 +3182,19 @@
             }
         });
         
-        // Toggle music player visibility
-        musicToggleBtn.addEventListener('click', () => {
+        // Toggle music player visibility - DIPERBAIKI
+        musicToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Mencegah event bubbling
+            console.log('Music toggle clicked'); // Debug log
+            
             if (!playerVisible) {
                 musicPlayer.classList.add('active');
                 playerVisible = true;
+                console.log('Player opened'); // Debug log
             } else {
                 musicPlayer.classList.remove('active');
                 playerVisible = false;
+                console.log('Player closed'); // Debug log
             }
         });
         
