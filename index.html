@@ -1577,146 +1577,6 @@
             box-shadow: 0 10px 20px var(--neon-glow);
         }
 
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .skills-container {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            }
-        }
-
-        @media (max-width: 992px) {
-            .profile-info h1 {
-                font-size: 2.5rem;
-            }
-            
-            .section-title h2 {
-                font-size: 2.4rem;
-            }
-            
-            .projects-grid {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .profile-info h1 {
-                font-size: 2.2rem;
-            }
-            
-            .about-content {
-                flex-direction: column;
-            }
-            
-            .contact-container {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .music-player {
-                width: 280px;
-                right: 20px;
-                bottom: 90px;
-            }
-
-            .back-to-top {
-                right: 80px;
-            }
-
-            .nav-container {
-                display: none;
-                flex-direction: column;
-                width: 100%;
-                position: absolute;
-                top: 60px;
-                left: 0;
-                background: rgba(10, 10, 10, 0.9);
-                z-index: 999;
-            }
-
-            .nav-container.active {
-                display: flex;
-            }
-
-            .menu-toggle {
-                display: flex;
-            }
-
-            nav a {
-                padding: 15px 20px;
-                text-align: center;
-                border-bottom: 1px solid var(--border-color);
-            }
-
-            .form-row {
-                flex-direction: column;
-            }
-            
-            .skills-container {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .projects-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .hero-btn {
-                width: 200px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .profile-img {
-                width: 150px;
-                height: 150px;
-            }
-            
-            .profile-ring, .profile-glow {
-                width: 150px;
-                height: 150px;
-            }
-            
-            .profile-info h1 {
-                font-size: 1.8rem;
-            }
-            
-            .section-title h2 {
-                font-size: 2rem;
-            }
-            
-            .skills-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .visitor-form, .skill-modal-content, .contact-form {
-                padding: 20px;
-            }
-            
-            .visitor-form h2, .skill-modal-title {
-                font-size: 1.5rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .skills-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .music-player {
-                width: 90%;
-                right: 5%;
-                left: 5%;
-            }
-            
-            .back-to-top {
-                right: 20px;
-            }
-        }
-
         /* Loading indicator for Firebase operations */
         .firebase-loading {
             display: inline-block;
@@ -1778,6 +1638,211 @@
             font-size: 12px;
             z-index: 10000;
             display: none;
+        }
+
+        /* Mobile Responsive Design - Unified for all mobile devices (320px-600px) */
+        @media (max-width: 600px) {
+            /* Profile Section */
+            .profile-img {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .profile-ring, .profile-glow {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .profile-info h1 {
+                font-size: 2.2rem;
+            }
+            
+            .profile-info p {
+                font-size: 1.2rem;
+            }
+            
+            .profile-info .age {
+                font-size: 1rem;
+                padding: 8px 16px;
+            }
+            
+            /* Navigation */
+            .nav-container {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                background: rgba(10, 10, 10, 0.9);
+                z-index: 999;
+            }
+
+            .nav-container.active {
+                display: flex;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            nav a {
+                padding: 15px 20px;
+                text-align: center;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            /* Section Titles */
+            .section-title h2 {
+                font-size: 2.2rem;
+            }
+            
+            /* About Section */
+            .about {
+                padding: 30px 20px;
+            }
+            
+            .about-text p {
+                font-size: 1rem;
+            }
+            
+            /* Skills Section */
+            .skills {
+                padding: 30px 20px;
+            }
+            
+            .skills-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+            }
+            
+            .skill-item {
+                padding: 20px 15px;
+            }
+            
+            .skill-logo {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .skill-name {
+                font-size: 0.9rem;
+            }
+            
+            /* Projects Section */
+            .projects {
+                padding: 30px 20px;
+            }
+            
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .project-card {
+                width: 100%;
+            }
+            
+            .project-img {
+                height: 200px;
+            }
+            
+            .project-info {
+                padding: 20px;
+            }
+            
+            .project-title {
+                font-size: 1.4rem;
+            }
+            
+            .project-desc {
+                font-size: 0.95rem;
+            }
+            
+            .project-tag {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .project-links a {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            /* Visitor History Section */
+            .visitor-history {
+                padding: 30px 20px;
+            }
+            
+            .visitor-item {
+                padding: 12px;
+            }
+            
+            /* Message Section */
+            .message-section {
+                padding: 30px 20px;
+            }
+            
+            .message-item {
+                padding: 15px;
+            }
+            
+            /* Contact Section */
+            .contact {
+                padding: 30px 20px;
+            }
+            
+            .contact-item {
+                width: 100%;
+                padding: 20px;
+            }
+            
+            .contact-form {
+                padding: 20px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            /* Footer */
+            footer {
+                padding: 30px 0;
+            }
+            
+            footer p {
+                font-size: 1rem;
+            }
+            
+            /* Music Player */
+            .music-player {
+                width: 90%;
+                right: 5%;
+                left: 5%;
+            }
+            
+            .back-to-top {
+                right: 20px;
+            }
+            
+            /* Hero Buttons */
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hero-btn {
+                width: 200px;
+            }
+            
+            /* Modal Forms */
+            .visitor-form, .skill-modal-content {
+                padding: 30px 20px;
+            }
+            
+            .visitor-form h2, .skill-modal-title {
+                font-size: 1.6rem;
+            }
         }
     </style>
 </head>
