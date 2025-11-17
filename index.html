@@ -2368,6 +2368,32 @@
             }
         }
         
+        // TAMBAHAN FUNGSI BARU - saveVisitorToFirestore
+        async function saveVisitorToFirestore(nameValue) {
+            if (!firestoreAvailable) throw new Error('Firestore tidak tersedia');
+
+            const docRef = db.collection('visitors').doc(nameValue); // pakai nama sebagai ID dokumen
+            const docSnap = await docRef.get();
+
+            if (docSnap.exists) {
+                // jika sudah pernah berkunjung → update visitCount
+                await docRef.update({
+                    visitCount: firebase.firestore.FieldValue.increment(1),
+                    lastVisit: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                return docRef.id;
+            } else {
+                // jika pertama kali berkunjung → buat doc baru
+                await docRef.set({
+                    name: nameValue,
+                    visitCount: 1,
+                    firstVisit: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastVisit: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                return docRef.id;
+            }
+        }
+        
         // Function to load visitor data from Firestore
         async function loadVisitors() {
             try {
@@ -2550,29 +2576,30 @@
             debugLog("Attempting to save visitor data");
             
             try {
-                // Save visitor data using the saveVisitor function
-                const result = await saveVisitor(nameValue);
-                
-                if (result.success) {
-                    // Save to localStorage for session tracking
-                    localStorage.setItem('visitorSubmitted', 'true');
-                    localStorage.setItem('visitorName', nameValue);
-                    
-                    // Hide the modal
-                    visitorModal.classList.add('hidden');
-                    
-                    // Load visitor history to refresh the list
-                    await loadVisitors();
-                    
-                    // Show success notification
-                    if (result.fallback) {
-                        showNotification('Terima kasih! Data Anda telah tersimpan (mode offline).');
-                    } else {
-                        showNotification('Terima kasih! Data Anda telah tersimpan.');
-                    }
+                // Gunakan fungsi baru saveVisitorToFirestore
+                if (firestoreAvailable) {
+                    await saveVisitorToFirestore(nameValue);
+                    debugLog(`Visitor ${nameValue} saved with visit count tracking`);
                 } else {
-                    throw new Error(result.error || 'Failed to save visitor data');
+                    // Fallback ke fungsi lama jika Firestore tidak tersedia
+                    const result = await saveVisitor(nameValue);
+                    if (!result.success) {
+                        throw new Error(result.error || 'Failed to save visitor data');
+                    }
                 }
+                
+                // Save to localStorage for session tracking
+                localStorage.setItem('visitorSubmitted', 'true');
+                localStorage.setItem('visitorName', nameValue);
+                
+                // Hide the modal
+                visitorModal.classList.add('hidden');
+                
+                // Load visitor history to refresh the list
+                await loadVisitors();
+                
+                // Show success notification
+                showNotification('Terima kasih! Data Anda telah tersimpan.');
             } catch (error) {
                 console.error('Error saving visitor data:', error);
                 debugLog(`Error: ${error.message}`);
